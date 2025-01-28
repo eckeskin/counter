@@ -100,7 +100,7 @@
 
     socket.on("personalCount", (personalCount) => {
       document.getElementById("personal-count").textContent = personalCount;
-      localStorage.setItem("lastPersonalCount", personalCount); // Kişisel sayıyı sakla
+      //localStorage.setItem("lastPersonalCount", personalCount); // Kişisel sayıyı sakla
     });
 
     socket.on("onlineCount", (count) => {
@@ -109,7 +109,7 @@
     });
 
     function updateProgressBar(count) {
-      const target = 70000;
+      const target = 100;
       const percentage = (count / target) * 100;
       document.getElementById("progress-bar").style.width = `${percentage}%`;
       document.getElementById("progress-text").textContent = `${percentage.toFixed(2)}%`;
