@@ -88,6 +88,8 @@
     // 📌 Tarayıcıdaki en son verileri yükle (0 yerine güncel veri göster)
     document.getElementById("count-display").textContent = localStorage.getItem("lastCount") || 0;
     document.getElementById("personal-count").textContent = localStorage.getItem("lastPersonalCount") || 0;
+    document.getElementById("progress-text").textContent = localStorage.getItem("lastProgress") || "0%";
+    document.getElementById("online-count").textContent = localStorage.getItem("lastOnlineCount") || 0;
 
     // 🔄 Sunucudan güncel sayaç verilerini alıp ekrana anında yansıt
     socket.on("updateCount", (count) => {
@@ -103,10 +105,7 @@
 
     socket.on("onlineCount", (count) => {
       document.getElementById("online-count").textContent = count;
-    });
-
-    document.getElementById("count-display").addEventListener("click", () => {
-      socket.emit("increment", userId);
+      localStorage.setItem("lastOnlineCount", count); // Online kullanıcıyı sakla
     });
 
     function updateProgressBar(count) {
@@ -114,14 +113,13 @@
       const percentage = (count / target) * 100;
       document.getElementById("progress-bar").style.width = `${percentage}%`;
       document.getElementById("progress-text").textContent = `${percentage.toFixed(2)}%`;
+      localStorage.setItem("lastProgress", `${percentage.toFixed(2)}%`); // Yüzdeyi sakla
     }
 
-    // ✅ Çift tıklayarak zoom yapılmasını engelle
     document.addEventListener("dblclick", (e) => {
       e.preventDefault();
     }, { passive: false });
 
-    // ✅ İki parmakla zoom yapmayı engelle
     document.addEventListener("gesturestart", (e) => {
       e.preventDefault();
     }, { passive: false });
