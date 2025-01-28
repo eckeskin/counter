@@ -17,6 +17,9 @@ const io = new Server(server, {
 // Ortak sayaç değişkeni
 let count = 0;
 
+// Kullanıcı bağlantılarını tutmak için bir yapı
+const users = {};
+
 // Statik dosyaları sun (index.html ve diğer dosyalar için)
 app.use(express.static(__dirname + "/public"));
 app.use(cors()); // CORS sorunlarını önler
@@ -24,6 +27,17 @@ app.use(cors()); // CORS sorunlarını önler
 // Socket.IO bağlantıları yönet
 io.on("connection", (socket) => {
   console.log("Bir kullanıcı bağlandı:", socket.id);
+
+  // Kullanıcıdan userId al
+  socket.on("registerUser", (userId) => {
+    if (!users[userId]) {
+      users[userId] = [];
+    }
+    users[userId].push(socket.id);
+
+    // Online kullanıcı sayısını tüm istemcilere gönder
+    io.emit("onlineCount", Object.keys(users).length);
+  });
 
   // Yeni bağlanan kullanıcıya mevcut sayaç değerini gönder
   socket.emit("updateCount", count);
@@ -34,8 +48,18 @@ io.on("connection", (socket) => {
     io.emit("updateCount", count);
   });
 
+  // Kullanıcı bağlantısını yönet
   socket.on("disconnect", () => {
-    console.log("Bir kullanıcı ayrıldı:", socket.id);
+    // Hangi kullanıcıdan çıktığını bul
+    for (const userId in users) {
+      users[userId] = users[userId].filter((id) => id !== socket.id);
+      if (users[userId].length === 0) {
+        delete users[userId];
+      }
+    }
+
+    // Online kullanıcı sayısını güncelle ve gönder
+    io.emit("onlineCount", Object.keys(users).length);
   });
 });
 

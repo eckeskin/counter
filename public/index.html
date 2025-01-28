@@ -35,11 +35,11 @@
 
     <!-- Sayaç (Tıklanabilir Yuvarlak Çerçeve) -->
     <div
-  id="count-display"
-  class="text-4xl font-extrabold text-green-600 bg-green-100 rounded-full w-52 h-52 flex items-center justify-center mx-auto cursor-pointer hover:bg-green-200 transition duration-200 mb-6 outline-none focus:outline-none focus:ring-0 select-none"
-  tabindex="-1"
+      id="count-display"
+      class="text-4xl font-extrabold text-green-600 bg-green-100 rounded-full w-52 h-52 flex items-center justify-center mx-auto cursor-pointer hover:bg-green-200 transition duration-200 mb-6 outline-none focus:outline-none focus:ring-0 select-none"
+      tabindex="-1"
     >
-    0
+      0
     </div>
 
     <!-- İlerleme Çubuğu -->
@@ -49,6 +49,9 @@
 
     <!-- Yüzdeyi Göster -->
     <p id="progress-text" class="text-sm text-gray-600 mt-2">0%</p>
+
+    <!-- Online Kullanıcı Sayısı -->
+    <p id="online-count" class="text-sm text-gray-600 mt-4">Online: 0</p>
   </div>
 
   <!-- Include the Socket.IO client library -->
@@ -58,34 +61,50 @@
   <script>
     const socket = io();
 
+    // Benzersiz bir userId oluştur ve kaydet
+    let userId = localStorage.getItem("userId");
+    if (!userId) {
+      userId = Math.random().toString(36).substring(2); // Rastgele bir ID oluştur
+      localStorage.setItem("userId", userId);
+    }
+
+    // Kullanıcıyı kaydet
+    socket.emit("registerUser", userId);
+
     // Log when the client successfully connects to the server
     socket.on("connect", () => {
-        console.log("Connected to server");
+      console.log("Connected to server");
     });
 
     // Handle the custom event and log the message to the console
     socket.on("userConnected", (message) => {
-        console.log(message);
+      console.log(message);
     });
 
     // Update the counter when receiving "updateCount" event
     socket.on("updateCount", (count) => {
-        console.log(`Received updateCount: ${count}`);
-        document.getElementById("count-display").textContent = count;
-        updateProgressBar(count);
+      console.log(`Received updateCount: ${count}`);
+      document.getElementById("count-display").textContent = count;
+      updateProgressBar(count);
+    });
+
+    // Online kullanıcı sayısını dinle
+    socket.on("onlineCount", (count) => {
+      console.log(`Online kullanıcı sayısı: ${count}`);
+      document.getElementById("online-count").textContent = `Online: ${count}`;
     });
 
     // Send "increment" event when count display is clicked
     document.getElementById("count-display").addEventListener("click", () => {
-        console.log("Increment button clicked");
-        socket.emit("increment");
+      console.log("Increment button clicked");
+      socket.emit("increment");
     });
 
     function updateProgressBar(count) {
-        const target = 70000;
-        const percentage = (count / target) * 100;
-        document.getElementById("progress-bar").style.width = `${percentage}%`;
-        document.getElementById("progress-text").textContent = `${percentage.toFixed(2)}%`;
+      const target = 70000;
+      const percentage = (count / target) * 100;
+      document.getElementById("progress-bar").style.width = `${percentage}%`;
+      document.getElementById("progress-text").textContent = `${percentage.toFixed(2)}%`;
     }
   </script>
 </body>
