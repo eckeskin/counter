@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Socket.IO Counter</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    #personal-count {
+      -webkit-user-select: none; /* Safari ve eski tarayıcılar */
+      -moz-user-select: none;    /* Firefox */
+      -ms-user-select: none;     /* Eski IE */
+      user-select: none;         /* Modern tarayıcılar */
+    }
+  </style>
 </head>
 <body class="bg-gradient-to-br from-blue-100 to-blue-300 flex items-center justify-center min-h-screen">
   <div class="bg-white shadow-xl rounded-2xl p-8 text-center w-80 relative">
@@ -42,7 +50,7 @@
       </div>
 
       <!-- Kişisel Katkı (Tıklamaya Kapalı, Sağ Üstte) -->
-      <div id="personal-count" class="absolute -top-3 -right-3 w-8 h-8 bg-green-500 text-white text-sm font-bold rounded-full flex items-center justify-center shadow-lg pointer-events-none">
+      <div id="personal-count" class="absolute -top-3 -right-3 w-8 h-8 bg-green-500 text-white text-sm font-bold rounded-full flex items-center justify-center shadow-lg pointer-events-none focus:outline-none select-none">
         0
       </div>
     </div>
@@ -77,13 +85,20 @@
       console.log("Connected to server");
     });
 
+    // 📌 Tarayıcıdaki en son verileri yükle (0 yerine güncel veri göster)
+    document.getElementById("count-display").textContent = localStorage.getItem("lastCount") || 0;
+    document.getElementById("personal-count").textContent = localStorage.getItem("lastPersonalCount") || 0;
+
+    // 🔄 Sunucudan güncel sayaç verilerini alıp ekrana anında yansıt
     socket.on("updateCount", (count) => {
       document.getElementById("count-display").textContent = count;
       updateProgressBar(count);
+      localStorage.setItem("lastCount", count); // Yeni değeri tarayıcıda sakla
     });
 
     socket.on("personalCount", (personalCount) => {
       document.getElementById("personal-count").textContent = personalCount;
+      localStorage.setItem("lastPersonalCount", personalCount); // Kişisel sayıyı sakla
     });
 
     socket.on("onlineCount", (count) => {
@@ -100,16 +115,6 @@
       document.getElementById("progress-bar").style.width = `${percentage}%`;
       document.getElementById("progress-text").textContent = `${percentage.toFixed(2)}%`;
     }
-
-    // ✅ Çift tıklayarak zoom yapılmasını engelle
-    document.addEventListener("dblclick", (e) => {
-      e.preventDefault();
-    }, { passive: false });
-
-    // ✅ İki parmakla zoom yapmayı engelle
-    document.addEventListener("gesturestart", (e) => {
-      e.preventDefault();
-    }, { passive: false });
 
   </script>
 </body>
