@@ -116,6 +116,16 @@
       document.getElementById("progress-text").textContent = `${percentage.toFixed(2)}%`;
     }
 
+    // ✅ Çift tıklayarak zoom yapılmasını engelle
+    document.addEventListener("dblclick", (e) => {
+      e.preventDefault();
+    }, { passive: false });
+
+    // ✅ İki parmakla zoom yapmayı engelle
+    document.addEventListener("gesturestart", (e) => {
+      e.preventDefault();
+    }, { passive: false });
+
   </script>
 </body>
 </html>
