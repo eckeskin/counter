@@ -101,7 +101,7 @@
             console.log("🔹 Online Kullanıcı Sayısı:", count);
             document.getElementById("online-count").textContent = count;
          });
-
+         
          socket.on("updateCount", (count) => {
            document.getElementById("count-display").textContent = count;
            document.getElementById("progress-bar").style.width = `${(count / target) * 100}%`;
@@ -111,11 +111,17 @@
              document.getElementById("success-modal").style.display = "flex";
            }
          });
-
+         
          // ✅ Modalı tüm cihazlarda kapatmak için buraya ekle
-socket.on("closeModal", () => {
-    document.getElementById("success-modal").style.display = "none";
-});
+         socket.on("closeModal", () => {
+         document.getElementById("success-modal").style.display = "none";
+         });
+         
+         // ✅ Sayaç tekrar aktif olsun
+         socket.on("resetState", () => {
+         hasReachedTarget = false;
+         document.getElementById("count-display").style.pointerEvents = "auto";
+         });
          
          document.getElementById("count-display").addEventListener("click", () => {
            if (!hasReachedTarget) {
@@ -142,7 +148,7 @@ socket.on("closeModal", () => {
             event.preventDefault();
             this.blur();
          });
-
+         
          document.getElementById("success-modal").addEventListener("mousedown", function(event) {
             if (event.target === this) {
                event.preventDefault();
@@ -150,15 +156,15 @@ socket.on("closeModal", () => {
                document.getElementById("close-modal").blur();
             }
          });
-
+         
          document.getElementById("close-modal").addEventListener("focus", function() {
             this.blur();
          });
-
+         
          document.addEventListener("dblclick", function(event) {
             event.preventDefault();
          });
-
+         
          document.addEventListener("gesturestart", function(event) {
             event.preventDefault();
          });
