@@ -10,32 +10,25 @@
          touch-action: pan-x pan-y;
          }
          #personal-count {
-         -webkit-user-select: none; /* Safari ve eski tarayıcılar */
-         -moz-user-select: none;    /* Firefox */
-         -ms-user-select: none;     /* Eski IE */
-         user-select: none;         /* Modern tarayıcılar */
+         -webkit-user-select: none;
+         -moz-user-select: none;
+         -ms-user-select: none;
+         user-select: none;
          }
          #success-modal {
          display: none;
-         }
-         #close-modal:focus {
-         outline: none !important;
-         box-shadow: none !important;
-         }
-         #close-modal {
-         box-shadow: none !important;
-         border: none !important;
+         user-select: none; /* Modal içindeki yazıyı seçilemez yap */
          }
          #success-modal > div {
          box-shadow: none !important;
          border: none !important;
          }
-         #close-modal:focus, #close-modal:active {
-         outline: none !important;
+         #close-modal {
          box-shadow: none !important;
+         border: none !important;
+         outline: none !important;
          }
-         #close-modal:focus,
-         #close-modal:active {
+         #close-modal:focus, #close-modal:active {
          outline: none !important;
          box-shadow: none !important;
          background-color: #3b82f6 !important;
@@ -55,26 +48,18 @@
          </p>
          <div class="mb-4">
             <label for="target-input" class="block text-sm text-gray-600 mb-2">Hedef:</label>
-            <input
-               id="target-input"
-               type="number"
+            <input id="target-input" type="number"
                class="w-full border border-gray-300 rounded-lg p-2 text-center bg-gray-100 text-gray-700 focus:outline-none"
-               value="70000"
-               readonly
-               />
+               value="70000" readonly />
          </div>
-         <!-- Sayaç Kapsayıcısı -->
          <div class="relative mx-auto w-52 h-52">
-            <!-- Büyük Sayaç Çemberi -->
-            <div
-               id="count-display"
+            <div id="count-display"
                class="text-4xl font-extrabold text-green-600 bg-green-100 rounded-full w-52 h-52 flex items-center justify-center mx-auto cursor-pointer hover:bg-green-200 transition duration-200 outline-none focus:outline-none focus:ring-0 select-none touch-action-manipulation"
-               tabindex="-1"
-               >
+               tabindex="-1">
                0
             </div>
-            <!-- Kişisel Katkı (Tıklamaya Kapalı, Sağ Üstte) -->
-            <div id="personal-count" class="absolute -top-3 -right-3 w-8 h-8 bg-green-500 text-white text-sm font-bold rounded-full flex items-center justify-center shadow-lg pointer-events-none focus:outline-none select-none">
+            <div id="personal-count"
+               class="absolute -top-3 -right-3 w-8 h-8 bg-green-500 text-white text-sm font-bold rounded-full flex items-center justify-center shadow-lg pointer-events-none focus:outline-none select-none">
                0
             </div>
          </div>
@@ -82,28 +67,27 @@
             <div id="progress-bar" class="bg-blue-500 h-4 rounded-full" style="width: 0%;"></div>
          </div>
          <p id="progress-text" class="text-sm text-gray-600 mt-2">0%</p>
-         <!-- Online Kullanıcı Sayısı (Daha Estetik) -->
          <div class="flex items-center justify-center mt-4">
             <span class="bg-green-500 text-white text-sm font-semibold px-4 py-2 rounded-full shadow-md">
             🟢 Online: <span id="online-count">0</span>
             </span>
          </div>
       </div>
-      <!-- Hedefe Ulaşılınca Gösterilecek Modal -->
       <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
          <div class="bg-white rounded-lg shadow-none p-6 text-center">
             <h2 class="text-2xl font-bold text-green-600 mb-4">🎉 Tebrikler! Hedefe ulaştınız! 🎉</h2>
             <p class="text-gray-600 mb-4">Sayacınız belirlenen hedefe ulaştı.</p>
-            <button id="close-modal" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none shadow-none border-none">
+            <button id="close-modal"
+               class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none shadow-none border-none">
             Kapat
-            </button>     
+            </button>
          </div>
       </div>
       <script src="/socket.io/socket.io.js"></script>
       <script>
          const socket = io();
-         let target = 10; 
-         let hasReachedTarget = false; 
+         let target = 10;
+         let hasReachedTarget = false;
          
          let userId = localStorage.getItem("userId");
          if (!userId) {
@@ -113,6 +97,11 @@
          
          socket.emit("registerUser", userId);
          
+         socket.on("onlineCount", (count) => {
+            console.log("🔹 Online Kullanıcı Sayısı:", count);
+            document.getElementById("online-count").textContent = count;
+         });
+
          socket.on("updateCount", (count) => {
            document.getElementById("count-display").textContent = count;
            document.getElementById("progress-bar").style.width = `${(count / target) * 100}%`;
@@ -144,32 +133,30 @@
          
          document.getElementById("close-modal").addEventListener("click", resetCounter);
          
-         // 💡 **BURAYA EKLE!**
-         
-         
-         document.getElementById("close-modal").addEventListener("click", function(event) {
-         event.preventDefault();
-         this.blur();
+         document.getElementById("close-modal").addEventListener("mousedown", function(event) {
+            event.preventDefault();
+            this.blur();
          });
-         
+
          document.getElementById("success-modal").addEventListener("mousedown", function(event) {
-         if (event.target === this) {
-         event.preventDefault();
-         document.activeElement.blur();
-         document.getElementById("close-modal").blur();
-         }
+            if (event.target === this) {
+               event.preventDefault();
+               document.activeElement.blur();
+               document.getElementById("close-modal").blur();
+            }
          });
-         
-         // Çift tıklama ile zoom yapılmasını engelle
+
+         document.getElementById("close-modal").addEventListener("focus", function() {
+            this.blur();
+         });
+
          document.addEventListener("dblclick", function(event) {
-         event.preventDefault();
+            event.preventDefault();
          });
-         
-         // Pinch-to-zoom (parmak hareketiyle zoom) engelleme
+
          document.addEventListener("gesturestart", function(event) {
-         event.preventDefault();
+            event.preventDefault();
          });
-         
       </script>
    </body>
 </html>
