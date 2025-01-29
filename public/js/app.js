@@ -105,7 +105,22 @@ class CounterApp {
     }
 
     updateCountDisplay(count) {
-        document.getElementById("count-display").textContent = count;
+        // Ana sayacı güncelle (sayıyı direkt içerik olarak ekle)
+        const mainDisplay = document.getElementById("count-display");
+        const mainCountSpan = document.createElement("span");
+        mainCountSpan.className = "main-count";
+        mainCountSpan.textContent = count;
+        
+        // Eğer zaten bir main-count span varsa, onu güncelle
+        const existingMainCount = mainDisplay.querySelector(".main-count");
+        if (existingMainCount) {
+            existingMainCount.textContent = count;
+        } else {
+            // Yoksa yeni span'i ekle
+            mainDisplay.insertBefore(mainCountSpan, mainDisplay.firstChild);
+        }
+
+        // Progress bar ve yüzdeyi güncelle
         const progress = (count / this.target) * 100;
         document.getElementById("progress-bar").style.width = `${progress}%`;
         document.getElementById("progress-text").textContent = `${Math.round(progress)}%`;

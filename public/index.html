@@ -37,41 +37,36 @@
       </style>
    </head>
    <body class="bg-gradient-to-br from-blue-100 to-blue-300 flex items-center justify-center min-h-screen">
-      <div class="bg-white shadow-xl rounded-2xl p-8 text-center w-80 relative">
-         <h1 class="text-xl font-bold text-gray-800 mb-2">
+      <div class="container">
+         <div class="arabic-text">
             إِنَّا لِلّهِ وَإِنَّـا إِلَيْهِ رَاجِعونَ
-         </h1>
-         <p class="text-sm text-gray-600 mb-6 italic">
+         </div>
+         <div class="transliteration">
             İnna lillâhi ve innâ ileyhi râciûn
-         </p>
-         <p class="text-lg text-gray-700 font-semibold mb-4">
+         </div>
+         <div class="shahada">
             Lâ ilâhe illâllah, Muhammedün Rasûlullah
-         </p>
-         <div class="mb-4">
-            <span class="text-gray-700 font-semibold">Hedef: </span>
-            <span id="target-input" class="text-gray-700 font-semibold">0</span>
          </div>
-         <div class="relative mx-auto w-52 h-52">
-            <div id="count-display"
-               class="opacity-0 text-4xl font-extrabold text-green-600 bg-green-100 rounded-full w-52 h-52 flex items-center justify-center mx-auto cursor-pointer hover:bg-green-200 transition-all duration-300 outline-none focus:outline-none focus:ring-0 select-none touch-action-manipulation"
-               tabindex="-1">
-               0
-            </div>
-            <div id="personal-count"
-               class="opacity-0 absolute -top-3 -right-3 w-8 h-8 bg-green-500 text-white text-sm font-bold rounded-full flex items-center justify-center shadow-lg pointer-events-none focus:outline-none select-none transition-all duration-300">
-               0
-            </div>
+         <div class="target-text">
+            Hedef: <span id="target-input">0</span>
          </div>
-         <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden mt-4">
-            <div id="progress-bar" class="opacity-0 bg-blue-500 h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
+         
+         <div id="count-display">
+            <span class="main-count">0</span>
+            <span id="personal-count">0</span>
          </div>
-         <p id="progress-text" class="opacity-0 text-sm text-gray-600 mt-2 transition-all duration-300">0%</p>
-         <div class="flex items-center justify-center mt-4">
-            <span class="bg-green-500 text-white text-sm font-semibold px-4 py-2 rounded-full shadow-md">
-            🟢 Online: <span id="online-count" class="opacity-0 transition-all duration-300">0</span>
-            </span>
+         
+         <div class="progress-container">
+            <div id="progress-bar"></div>
+         </div>
+         <div id="progress-text">0%</div>
+         
+         <div class="online-container">
+            <span class="online-dot"></span>
+            Online: <span id="online-count">0</span>
          </div>
       </div>
+
       <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
          <div class="bg-white rounded-lg shadow-none p-6 text-center">
             <h2 class="text-2xl font-bold text-green-600 mb-4">🎉 Tebrikler! Hedefe ulaştınız! 🎉</h2>

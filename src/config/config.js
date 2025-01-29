@@ -4,5 +4,5 @@ module.exports = {
         origin: "*",
         methods: ["GET", "POST"]
     },
-    TARGET_COUNT: 100
+    TARGET_COUNT: 10
 }; 
