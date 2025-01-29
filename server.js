@@ -30,7 +30,6 @@ io.on("connection", (socket) => {
     }
     users[userId].push(socket.id);
 
-    // Yeni bağlanan kullanıcıya mevcut sayaç değerlerini hemen gönder
     socket.emit("updateCount", count);
     socket.emit("personalCount", userClicks[userId] || 0);
     socket.emit("onlineCount", Object.keys(users).length);
@@ -44,6 +43,14 @@ io.on("connection", (socket) => {
 
     io.emit("updateCount", count);
     socket.emit("personalCount", userClicks[userId]);
+  });
+
+  socket.on("resetCount", () => {
+    count = 0; // Sayaç sıfırlanıyor
+    for (const userId in userClicks) {
+      userClicks[userId] = 0;
+    }
+    io.emit("updateCount", count);
   });
 
   socket.on("disconnect", () => {
