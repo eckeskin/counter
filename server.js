@@ -24,23 +24,29 @@ app.use(express.static(__dirname + "/public"));
 app.use(cors());
 
 io.on("connection", (socket) => {
-   console.log(`🔗 Bir kullanıcı bağlandı: ${socket.id}`);
-   onlineUsers++;
+  console.log(`🔗 Bir kullanıcı bağlandı: ${socket.id}`);
+  onlineUsers++;
 
-   console.log(`🌐 Şu an online kullanıcılar: ${onlineUsers}`);
-   io.emit("onlineCount", onlineUsers);
+  console.log(`🌐 Şu an online kullanıcılar: ${onlineUsers}`);
+  io.emit("onlineCount", onlineUsers);
 
-   socket.on("registerUser", (userId) => {
+  // ✅ Yeni bağlanan istemciye mevcut sayaç bilgisini gönder (Sıfır görünmemesi için)
+  socket.emit("updateCount", count); // Ana sayaç değerini gönder
+  socket.emit("personalCount", 0);   // ✅ Kişisel sayaç her seferinde sıfır başlasın
+
+  socket.on("registerUser", (userId) => {
       console.log(`🆕 Kullanıcı kaydı alındı: ${userId}`);
       if (!users[userId]) {
-         users[userId] = [];
-         userClicks[userId] = 0;
+          users[userId] = [];
+          userClicks[userId] = 0;
       }
       users[userId].push(socket.id);
 
       console.log(`📊 Güncellenmiş kullanıcı sayısı: ${Object.keys(users).length}`);
       io.emit("onlineCount", onlineUsers);
-   });
+  });
+});
+
 
    socket.on("increment", (userId) => {
       count++;
