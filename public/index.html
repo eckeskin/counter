@@ -111,6 +111,11 @@
              document.getElementById("success-modal").style.display = "flex";
            }
          });
+
+         // ✅ Modalı tüm cihazlarda kapatmak için buraya ekle
+socket.on("closeModal", () => {
+    document.getElementById("success-modal").style.display = "none";
+});
          
          document.getElementById("count-display").addEventListener("click", () => {
            if (!hasReachedTarget) {

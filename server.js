@@ -48,13 +48,14 @@ io.on("connection", (socket) => {
     socket.emit("personalCount", userClicks[userId]);
   });
 
-  socket.on("resetCount", () => {
+   socket.on("resetCount", () => {
     count = 0;
     for (const userId in userClicks) {
       userClicks[userId] = 0;
     }
-    io.emit("updateCount", count);
-  });
+    io.emit("updateCount", count); // ✅ Sayaç tüm cihazlarda sıfırlansın
+    io.emit("closeModal"); // ✅ Modal tüm cihazlarda kapansın
+});
 
   socket.on("disconnect", () => {
     console.log(`❌ Kullanıcı ayrıldı: ${socket.id}`);
