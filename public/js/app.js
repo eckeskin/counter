@@ -125,10 +125,43 @@ class CounterApp {
         document.getElementById("progress-bar").style.width = `${progress}%`;
         document.getElementById("progress-text").textContent = `${Math.round(progress)}%`;
 
+        // Hedefe ulaşıldığında
         if (count >= this.target && !this.hasReachedTarget) {
             this.hasReachedTarget = true;
-            document.getElementById("success-modal").style.display = "flex";
+            
+            // Kişisel sayacı hemen gizle ve pointer-events'i kapat
+            const personalCount = document.getElementById("personal-count");
+            personalCount.style.opacity = "0";
+            personalCount.style.pointerEvents = "none";
+            
+            // Başarı mesajını göster
+            this.showSuccessMessage();
+            
+            // 800ms sonra sayacı otomatik sıfırla
+            setTimeout(() => {
+                this.resetCounter();
+            }, 800);
         }
+    }
+
+    showSuccessMessage() {
+        const message = document.getElementById("success-message");
+        const targetText = document.getElementById("target-input").parentElement;
+        
+        // Hedef yazısını gizle
+        targetText.style.opacity = "0";
+        
+        // Başarı mesajını göster
+        message.classList.add("show");
+        
+        // 800ms sonra mesajı gizle ve hedef yazısını göster
+        setTimeout(() => {
+            message.classList.remove("show");
+            targetText.style.opacity = "1";
+            
+            // Kişisel sayacı tekrar göster
+            document.getElementById("personal-count").style.opacity = "1";
+        }, 800);
     }
 
     initializeEventListeners() {
@@ -172,33 +205,44 @@ class CounterApp {
 
     resetCounter() {
         this.hasReachedTarget = false;
+        const personalCount = document.getElementById("personal-count");
+        personalCount.style.opacity = "1";
+        personalCount.style.pointerEvents = "auto";
         document.getElementById("count-display").style.pointerEvents = "auto";
-        document.getElementById("success-modal").style.display = "none";
-
-        setTimeout(() => {
-            document.activeElement.blur();
-            document.getElementById("close-modal").blur();
-        }, 10);
-        
         this.socket.emit("resetCount");
     }
 
     // Elementleri görünür yap
     showElements() {
-        const elements = [
-            document.getElementById("count-display"),
-            document.getElementById("personal-count"),
-            document.getElementById("progress-bar"),
-            document.getElementById("progress-text"),
-            document.getElementById("online-count")
-        ];
+        // Hedefe ulaşıldıysa kişisel sayacı gösterme
+        if (this.hasReachedTarget) {
+            const elements = [
+                document.getElementById("count-display"),
+                document.getElementById("progress-bar"),
+                document.getElementById("progress-text"),
+                document.getElementById("online-count")
+            ];
 
-        // Tüm elementleri aynı anda görünür yap
-        requestAnimationFrame(() => {
-            elements.forEach(element => {
-                element.style.opacity = "1";
+            requestAnimationFrame(() => {
+                elements.forEach(element => {
+                    element.style.opacity = "1";
+                });
             });
-        });
+        } else {
+            const elements = [
+                document.getElementById("count-display"),
+                document.getElementById("personal-count"),
+                document.getElementById("progress-bar"),
+                document.getElementById("progress-text"),
+                document.getElementById("online-count")
+            ];
+
+            requestAnimationFrame(() => {
+                elements.forEach(element => {
+                    element.style.opacity = "1";
+                });
+            });
+        }
     }
 }
 
