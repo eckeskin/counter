@@ -8,11 +8,48 @@ class CounterApp {
         // Sayfa yüklendiğinde kişisel sayacı sıfırla
         document.getElementById("personal-count").textContent = "0";
         
+        // Sayfa görünürlük değişikliğini izle
+        this.setupVisibilityListener();
+        
         this.initializeSocketEvents();
         this.initializeEventListeners();
         
         // Hedef sayıyı güncelle
         document.getElementById("target-input").textContent = this.target.toLocaleString();
+    }
+
+    setupVisibilityListener() {
+        // Sayfa görünürlük değişikliğini izle
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                console.log('📱 Sayfa görünür oldu, güncel durumu alınıyor...');
+                
+                // Socket bağlantısını kontrol et
+                if (!this.socket.connected) {
+                    console.log('🔄 Socket yeniden bağlanıyor...');
+                    this.socket.connect();
+                }
+                
+                // Güncel durumu almak için sunucuya istek gönder
+                this.socket.emit('requestUpdate');
+            }
+        });
+
+        // Ekran açıldığında da kontrol et (iOS için)
+        window.addEventListener('focus', () => {
+            console.log('📱 Ekran odağı alındı, güncel durumu alınıyor...');
+            this.socket.emit('requestUpdate');
+        });
+
+        // Ağ bağlantısı değişikliklerini izle
+        window.addEventListener('online', () => {
+            console.log('🌐 İnternet bağlantısı sağlandı, güncel durumu alınıyor...');
+            if (this.socket.connected) {
+                this.socket.emit('requestUpdate');
+            } else {
+                this.socket.connect();
+            }
+        });
     }
 
     initializeUserId() {

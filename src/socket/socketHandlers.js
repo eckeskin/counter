@@ -41,6 +41,23 @@ class SocketHandler {
         socket.on("increment", (userId) => this.handleIncrement(io, socket, userId));
         socket.on("resetCount", () => this.handleResetCount(io));
         socket.on("disconnect", () => this.handleDisconnect(io, socket));
+        
+        // Güncel durum isteğini karşıla
+        socket.on("requestUpdate", () => {
+            console.log(`📲 ${socket.userId} için güncel durum gönderiliyor`);
+            
+            // Ana sayacı gönder
+            socket.emit("updateCount", this.count);
+            
+            // Kişisel sayacı gönder
+            if (socket.userId) {
+                const personalCount = this.userClicks.get(socket.userId) || 0;
+                socket.emit("personalCount", personalCount);
+            }
+            
+            // Online kullanıcı sayısını gönder
+            socket.emit("onlineCount", this.getOnlineUserCount());
+        });
     }
 
     handleRegisterUser(io, socket, userId) {
