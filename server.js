@@ -1,8 +1,6 @@
 const express = require("express");
 const http = require("http");
-const {
-   Server
-} = require("socket.io");
+const { Server } = require("socket.io");
 const cors = require("cors");
 
 const app = express();
@@ -24,30 +22,29 @@ app.use(express.static(__dirname + "/public"));
 app.use(cors());
 
 io.on("connection", (socket) => {
-  console.log(`🔗 Bir kullanıcı bağlandı: ${socket.id}`);
-  onlineUsers++;
+   console.log(`🔗 Bir kullanıcı bağlandı: ${socket.id}`);
+   onlineUsers++;
 
-  console.log(`🌐 Şu an online kullanıcılar: ${onlineUsers}`);
-  io.emit("onlineCount", onlineUsers);
+   console.log(`🌐 Şu an online kullanıcılar: ${onlineUsers}`);
+   io.emit("onlineCount", onlineUsers);
 
-  // ✅ Yeni bağlanan istemciye mevcut sayaç bilgisini gönder (Sıfır görünmemesi için)
-  socket.emit("updateCount", count); // Ana sayaç değerini gönder
-  socket.emit("personalCount", 0);   // ✅ Kişisel sayaç her seferinde sıfır başlasın
+   // ✅ Yeni bağlanan istemciye mevcut sayaç bilgisini gönder (Sıfır görünmemesi için)
+   socket.emit("updateCount", count); // Ana sayaç değerini gönder
+   socket.emit("personalCount", 0);   // ✅ Kişisel sayaç her seferinde sıfır başlasın
 
-  socket.on("registerUser", (userId) => {
+   socket.on("registerUser", (userId) => {
       console.log(`🆕 Kullanıcı kaydı alındı: ${userId}`);
       if (!users[userId]) {
-          users[userId] = [];
-          userClicks[userId] = 0;
+         users[userId] = [];
+         userClicks[userId] = 0;
       }
       users[userId].push(socket.id);
 
       console.log(`📊 Güncellenmiş kullanıcı sayısı: ${Object.keys(users).length}`);
       io.emit("onlineCount", onlineUsers);
-  });
-});
+   });
 
-
+   // ✅ Sayaç artırma event’i
    socket.on("increment", (userId) => {
       count++;
       userClicks[userId] = (userClicks[userId] || 0) + 1;
@@ -56,6 +53,7 @@ io.on("connection", (socket) => {
       socket.emit("personalCount", userClicks[userId]);
    });
 
+   // ✅ Sayaç sıfırlama event’i
    socket.on("resetCount", () => {
       count = 0;
       for (const userId in userClicks) {
@@ -66,6 +64,7 @@ io.on("connection", (socket) => {
       io.emit("resetState"); // ✅ Tüm istemciler sayaca tekrar basabilsin
    });
 
+   // ✅ Kullanıcı çıkışı event’i
    socket.on("disconnect", () => {
       console.log(`❌ Kullanıcı ayrıldı: ${socket.id}`);
       onlineUsers = Math.max(0, onlineUsers - 1);
