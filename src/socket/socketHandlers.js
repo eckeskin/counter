@@ -112,28 +112,48 @@ class SocketHandler {
 
         console.log(`❌ Socket bağlantısı koptu: ${socket.id} (Kullanıcı: ${userId})`);
         
+        // Önce socket'i kullanıcının socket listesinden çıkar
         const userSockets = this.getUserSockets(userId);
         userSockets.delete(socket.id);
 
-        // Eğer kullanıcının başka aktif soketi yoksa, 30 saniye bekle
+        // Eğer kullanıcının başka aktif soketi yoksa
         if (userSockets.size === 0) {
-            console.log(`⏱️ ${userId} için 30 saniyelik disconnect timer başlatıldı`);
+            console.log(`⏱️ ${userId} için bağlantı kesme işlemi başlatıldı`);
+            
+            // Eğer önceden bir timer varsa onu temizle
+            if (this.disconnectTimers.has(userId)) {
+                clearTimeout(this.disconnectTimers.get(userId));
+            }
             
             const timer = setTimeout(() => {
-                if (!this.isUserConnected(userId)) {
+                // Timer dolduğunda tekrar kontrol et
+                const currentSockets = this.getUserSockets(userId);
+                if (!currentSockets || currentSockets.size === 0) {
                     console.log(`⌛ ${userId} için süre doldu, kullanıcı siliniyor`);
+                    
+                    // Kullanıcıyı tamamen temizle
                     this.users.delete(userId);
                     this.userClicks.delete(userId);
                     this.disconnectTimers.delete(userId);
                     
+                    // Online sayısını güncelle ve yayınla
                     const onlineCount = this.getOnlineUserCount();
                     console.log(`📉 Güncellenmiş online kullanıcı sayısı: ${onlineCount}`);
                     io.emit("onlineCount", onlineCount);
+                } else {
+                    console.log(`🔄 ${userId} hala bağlı socket'lere sahip, silme işlemi iptal edildi`);
                 }
-            }, 30000); // 30 saniye bekle
+            }, 5000); // 5 saniyeye düşürdük
 
             this.disconnectTimers.set(userId, timer);
+        } else {
+            console.log(`ℹ️ ${userId} için hala ${userSockets.size} aktif bağlantı var`);
         }
+
+        // Her disconnect'te online sayısını güncelle
+        const onlineCount = this.getOnlineUserCount();
+        console.log(`📊 Anlık online kullanıcı sayısı: ${onlineCount}`);
+        io.emit("onlineCount", onlineCount);
     }
 }
 
