@@ -2,87 +2,39 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
+const path = require("path");
+const config = require("./src/config/config");
+const socketHandler = require("./src/socket/socketHandlers");
 
-const app = express();
-const server = http.createServer(app);
+class App {
+    constructor() {
+        this.app = express();
+        this.server = http.createServer(this.app);
+        this.io = new Server(this.server, {
+            cors: config.CORS_OPTIONS
+        });
 
-const io = new Server(server, {
-   cors: {
-      origin: "*",
-      methods: ["GET", "POST"]
-   }
-});
+        this.setupMiddleware();
+        this.setupSocketIO();
+    }
 
-let count = 0;
-const users = {};
-const userClicks = {};
-let onlineUsers = 0;
+    setupMiddleware() {
+        this.app.use(express.static(path.join(__dirname, "public")));
+        this.app.use(cors());
+    }
 
-app.use(express.static(__dirname + "/public"));
-app.use(cors());
+    setupSocketIO() {
+        this.io.on("connection", (socket) => {
+            socketHandler.handleConnection(this.io, socket);
+        });
+    }
 
-io.on("connection", (socket) => {
-   console.log(`🔗 Bir kullanıcı bağlandı: ${socket.id}`);
-   onlineUsers++;
+    start() {
+        this.server.listen(config.PORT, () => {
+            console.log(`🚀 Sunucu ${config.PORT} portunda çalışıyor...`);
+        });
+    }
+}
 
-   console.log(`🌐 Şu an online kullanıcılar: ${onlineUsers}`);
-   io.emit("onlineCount", onlineUsers);
-
-   // ✅ Yeni bağlanan istemciye mevcut sayaç bilgisini gönder (Sıfır görünmemesi için)
-   socket.emit("updateCount", count); // Ana sayaç değerini gönder
-   socket.emit("personalCount", 0);   // ✅ Kişisel sayaç her seferinde sıfır başlasın
-
-   socket.on("registerUser", (userId) => {
-      console.log(`🆕 Kullanıcı kaydı alındı: ${userId}`);
-      if (!users[userId]) {
-         users[userId] = [];
-         userClicks[userId] = 0;
-      }
-      users[userId].push(socket.id);
-
-      console.log(`📊 Güncellenmiş kullanıcı sayısı: ${Object.keys(users).length}`);
-      io.emit("onlineCount", onlineUsers);
-   });
-
-   // ✅ Sayaç artırma event’i
-   socket.on("increment", (userId) => {
-      count++;
-      userClicks[userId] = (userClicks[userId] || 0) + 1;
-
-      io.emit("updateCount", count);
-      socket.emit("personalCount", userClicks[userId]);
-   });
-
-   // ✅ Sayaç sıfırlama event’i
-   socket.on("resetCount", () => {
-      count = 0;
-      for (const userId in userClicks) {
-         userClicks[userId] = 0;
-      }
-      io.emit("updateCount", count); // ✅ Tüm istemciler sayacı sıfırlasın
-      io.emit("closeModal"); // ✅ Modal tüm cihazlarda kapansın
-      io.emit("resetState"); // ✅ Tüm istemciler sayaca tekrar basabilsin
-   });
-
-   // ✅ Kullanıcı çıkışı event’i
-   socket.on("disconnect", () => {
-      console.log(`❌ Kullanıcı ayrıldı: ${socket.id}`);
-      onlineUsers = Math.max(0, onlineUsers - 1);
-
-      for (const userId in users) {
-         users[userId] = users[userId].filter((id) => id !== socket.id);
-         if (users[userId].length === 0) {
-            delete users[userId];
-            delete userClicks[userId];
-         }
-      }
-
-      console.log(`📉 Güncellenmiş online kullanıcı sayısı: ${onlineUsers}`);
-      io.emit("onlineCount", onlineUsers);
-   });
-});
-
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-   console.log(`🚀 Sunucu ${PORT} portunda çalışıyor...`);
-});
+const app = new App();
+app.start(); 

@@ -1,0 +1,123 @@
+class CounterApp {
+    constructor() {
+        this.socket = io();
+        this.target = 100; // Bu değer backend'den gelecek
+        this.hasReachedTarget = false;
+        this.userId = this.initializeUserId();
+        this.initializeSocketEvents();
+        this.initializeEventListeners();
+        
+        // Hedef sayıyı güncelle
+        document.getElementById("target-input").textContent = this.target.toLocaleString();
+    }
+
+    initializeUserId() {
+        let userId = localStorage.getItem("userId");
+        if (!userId) {
+            userId = Math.random().toString(36).substring(2);
+            localStorage.setItem("userId", userId);
+        }
+        return userId;
+    }
+
+    initializeSocketEvents() {
+        this.socket.emit("registerUser", this.userId);
+
+        // Hedef sayıyı backend'den al
+        this.socket.on("config", (config) => {
+            this.target = config.TARGET_COUNT;
+            document.getElementById("target-input").textContent = this.target.toLocaleString();
+        });
+
+        this.socket.on("onlineCount", (count) => {
+            console.log("🔹 Online Kullanıcı Sayısı:", count);
+            document.getElementById("online-count").textContent = count;
+        });
+
+        this.socket.on("updateCount", (count) => {
+            this.updateCountDisplay(count);
+        });
+
+        this.socket.on("closeModal", () => {
+            document.getElementById("success-modal").style.display = "none";
+        });
+
+        this.socket.on("resetState", () => {
+            this.hasReachedTarget = false;
+            document.getElementById("count-display").style.pointerEvents = "auto";
+        });
+
+        this.socket.on("personalCount", (count) => {
+            document.getElementById("personal-count").textContent = count;
+        });
+    }
+
+    updateCountDisplay(count) {
+        document.getElementById("count-display").textContent = count;
+        const progress = (count / this.target) * 100;
+        document.getElementById("progress-bar").style.width = `${progress}%`;
+        document.getElementById("progress-text").textContent = `${Math.round(progress)}%`;
+
+        if (count >= this.target && !this.hasReachedTarget) {
+            this.hasReachedTarget = true;
+            document.getElementById("success-modal").style.display = "flex";
+        }
+    }
+
+    initializeEventListeners() {
+        document.getElementById("count-display").addEventListener("click", () => {
+            if (!this.hasReachedTarget) {
+                this.socket.emit("increment", this.userId);
+            }
+        });
+
+        document.getElementById("close-modal").addEventListener("click", () => this.resetCounter());
+        
+        this.initializeUIEventListeners();
+    }
+
+    initializeUIEventListeners() {
+        document.getElementById("close-modal").addEventListener("mousedown", function(event) {
+            event.preventDefault();
+            this.blur();
+        });
+
+        document.getElementById("success-modal").addEventListener("mousedown", function(event) {
+            if (event.target === this) {
+                event.preventDefault();
+                document.activeElement.blur();
+                document.getElementById("close-modal").blur();
+            }
+        });
+
+        document.getElementById("close-modal").addEventListener("focus", function() {
+            this.blur();
+        });
+
+        document.addEventListener("dblclick", function(event) {
+            event.preventDefault();
+        });
+
+        document.addEventListener("gesturestart", function(event) {
+            event.preventDefault();
+        });
+    }
+
+    resetCounter() {
+        this.hasReachedTarget = false;
+        document.getElementById("count-display").style.pointerEvents = "auto";
+        document.getElementById("success-modal").style.display = "none";
+
+        setTimeout(() => {
+            document.activeElement.blur();
+            document.getElementById("close-modal").blur();
+        }, 10);
+        
+        this.socket.emit("resetCount");
+    }
+}
+
+// Uygulama başlatma
+document.addEventListener("DOMContentLoaded", () => {
+    new CounterApp();
+}); 
