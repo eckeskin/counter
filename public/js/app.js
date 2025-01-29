@@ -29,7 +29,7 @@ class CounterApp {
         document.getElementById("personal-count").textContent = "0";
         this.socket.emit("registerUser", this.userId);
 
-        // Hedef sayıyı backend'den al
+        // İlk veri geldiğinde elementleri göster
         this.socket.on("config", (config) => {
             this.target = config.TARGET_COUNT;
             document.getElementById("target-input").textContent = this.target.toLocaleString();
@@ -38,10 +38,12 @@ class CounterApp {
         this.socket.on("onlineCount", (count) => {
             console.log("🔹 Online Kullanıcı Sayısı:", count);
             document.getElementById("online-count").textContent = count;
+            this.showElements(); // Online sayısı geldiğinde göster
         });
 
         this.socket.on("updateCount", (count) => {
             this.updateCountDisplay(count);
+            this.showElements(); // Sayaç değeri geldiğinde göster
         });
 
         this.socket.on("closeModal", () => {
@@ -55,6 +57,7 @@ class CounterApp {
 
         this.socket.on("personalCount", (count) => {
             document.getElementById("personal-count").textContent = count;
+            this.showElements(); // Kişisel sayaç geldiğinde göster
         });
 
         // Yeniden bağlanma durumunda
@@ -126,6 +129,24 @@ class CounterApp {
         }, 10);
         
         this.socket.emit("resetCount");
+    }
+
+    // Elementleri görünür yap
+    showElements() {
+        const elements = [
+            document.getElementById("count-display"),
+            document.getElementById("personal-count"),
+            document.getElementById("progress-bar"),
+            document.getElementById("progress-text"),
+            document.getElementById("online-count")
+        ];
+
+        // Tüm elementleri aynı anda görünür yap
+        requestAnimationFrame(() => {
+            elements.forEach(element => {
+                element.style.opacity = "1";
+            });
+        });
     }
 }
 

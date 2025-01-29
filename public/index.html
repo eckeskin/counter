@@ -53,22 +53,22 @@
          </div>
          <div class="relative mx-auto w-52 h-52">
             <div id="count-display"
-               class="text-4xl font-extrabold text-green-600 bg-green-100 rounded-full w-52 h-52 flex items-center justify-center mx-auto cursor-pointer hover:bg-green-200 transition duration-200 outline-none focus:outline-none focus:ring-0 select-none touch-action-manipulation"
+               class="opacity-0 text-4xl font-extrabold text-green-600 bg-green-100 rounded-full w-52 h-52 flex items-center justify-center mx-auto cursor-pointer hover:bg-green-200 transition-all duration-300 outline-none focus:outline-none focus:ring-0 select-none touch-action-manipulation"
                tabindex="-1">
                0
             </div>
             <div id="personal-count"
-               class="absolute -top-3 -right-3 w-8 h-8 bg-green-500 text-white text-sm font-bold rounded-full flex items-center justify-center shadow-lg pointer-events-none focus:outline-none select-none">
+               class="opacity-0 absolute -top-3 -right-3 w-8 h-8 bg-green-500 text-white text-sm font-bold rounded-full flex items-center justify-center shadow-lg pointer-events-none focus:outline-none select-none transition-all duration-300">
                0
             </div>
          </div>
          <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden mt-4">
-            <div id="progress-bar" class="bg-blue-500 h-4 rounded-full" style="width: 0%;"></div>
+            <div id="progress-bar" class="opacity-0 bg-blue-500 h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
          </div>
-         <p id="progress-text" class="text-sm text-gray-600 mt-2">0%</p>
+         <p id="progress-text" class="opacity-0 text-sm text-gray-600 mt-2 transition-all duration-300">0%</p>
          <div class="flex items-center justify-center mt-4">
             <span class="bg-green-500 text-white text-sm font-semibold px-4 py-2 rounded-full shadow-md">
-            🟢 Online: <span id="online-count">0</span>
+            🟢 Online: <span id="online-count" class="opacity-0 transition-all duration-300">0</span>
             </span>
          </div>
       </div>
