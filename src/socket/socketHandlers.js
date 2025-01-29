@@ -33,13 +33,6 @@ class SocketHandler {
         });
 
         socket.emit("updateCount", this.count);
-        
-        // Kullanıcı daha önce tıklama yapmışsa, kişisel sayacını gönder
-        socket.on("registerUser", (userId) => {
-            const clicks = this.userClicks.get(userId) || 0;
-            socket.emit("personalCount", clicks);
-        });
-
         this.setupSocketEvents(io, socket);
     }
 
@@ -58,14 +51,16 @@ class SocketHandler {
             console.log(`⏱️ ${userId} için disconnect timer iptal edildi`);
         }
         
-        // Kullanıcıyı kaydet
+        // Kullanıcıyı kaydet ve kişisel sayacı sıfırla
         if (!this.users.has(userId)) {
             this.users.set(userId, new Set());
-            this.userClicks.set(userId, 0);
             console.log(`🆕 Yeni kullanıcı kaydı alındı: ${userId}`);
         } else {
             console.log(`🔄 Mevcut kullanıcı yeni sekmede: ${userId}`);
         }
+        
+        // Her yeni bağlantıda kişisel sayacı sıfırla
+        this.userClicks.set(userId, 0);
         
         this.users.get(userId).add(socket.id);
         socket.userId = userId; // Socket nesnesine userId'yi ekle
@@ -73,6 +68,9 @@ class SocketHandler {
         const onlineCount = this.getOnlineUserCount();
         console.log(`📊 Güncellenmiş kullanıcı sayısı: ${onlineCount}`);
         io.emit("onlineCount", onlineCount);
+        
+        // Kişisel sayacı sıfır olarak gönder
+        socket.emit("personalCount", 0);
     }
 
     handleIncrement(io, socket, userId) {
@@ -90,10 +88,19 @@ class SocketHandler {
     }
 
     handleResetCount(io) {
+        // Ana sayacı sıfırla
         this.count = 0;
-        for (const [userId] of this.userClicks) {
+        
+        // Tüm kullanıcıların kişisel sayaçlarını sıfırla
+        for (const [userId, sockets] of this.users) {
             this.userClicks.set(userId, 0);
+            // Her kullanıcının tüm aktif sekmelerine sıfır değerini gönder
+            for (const socketId of sockets) {
+                io.to(socketId).emit("personalCount", 0);
+            }
         }
+
+        // Diğer güncellemeleri gönder
         io.emit("updateCount", this.count);
         io.emit("closeModal");
         io.emit("resetState");

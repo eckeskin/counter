@@ -4,6 +4,10 @@ class CounterApp {
         this.target = 100; // Bu değer backend'den gelecek
         this.hasReachedTarget = false;
         this.userId = this.initializeUserId();
+        
+        // Sayfa yüklendiğinde kişisel sayacı sıfırla
+        document.getElementById("personal-count").textContent = "0";
+        
         this.initializeSocketEvents();
         this.initializeEventListeners();
         
@@ -21,6 +25,8 @@ class CounterApp {
     }
 
     initializeSocketEvents() {
+        // Önce kişisel sayacı sıfırla, sonra kullanıcı kaydı yap
+        document.getElementById("personal-count").textContent = "0";
         this.socket.emit("registerUser", this.userId);
 
         // Hedef sayıyı backend'den al
@@ -49,6 +55,12 @@ class CounterApp {
 
         this.socket.on("personalCount", (count) => {
             document.getElementById("personal-count").textContent = count;
+        });
+
+        // Yeniden bağlanma durumunda
+        this.socket.on("connect", () => {
+            document.getElementById("personal-count").textContent = "0";
+            this.socket.emit("registerUser", this.userId);
         });
     }
 
