@@ -1,205 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Socket.IO Counter</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    #personal-count {
-      -webkit-user-select: none; /* Safari ve eski tarayıcılar */
-      -moz-user-select: none;    /* Firefox */
-      -ms-user-select: none;     /* Eski IE */
-      user-select: none;         /* Modern tarayıcılar */
-    }
-    #success-modal {
-      display: none;
-    }
-
-    #close-modal:focus {
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-    #close-modal {
-    box-shadow: none !important;
-    border: none !important;
-  }
-
-  #success-modal > div {
-    box-shadow: none !important;
-    border: none !important;
-  }
-
-  #close-modal:focus, #close-modal:active {
-  outline: none !important;
-  box-shadow: none !important;
-}
-  </style>
-</head>
-<body class="bg-gradient-to-br from-blue-100 to-blue-300 flex items-center justify-center min-h-screen">
-  <div class="bg-white shadow-xl rounded-2xl p-8 text-center w-80 relative">
-    <h1 class="text-xl font-bold text-gray-800 mb-2">
-      إِنَّا لِلّهِ وَإِنَّـا إِلَيْهِ رَاجِعونَ
-    </h1>
-    <p class="text-sm text-gray-600 mb-6 italic">
-      İnna lillâhi ve innâ ileyhi râciûn
-    </p>
-
-    <p class="text-lg text-gray-700 font-semibold mb-4">
-      Lâ ilâhe illâllah, Muhammedün Rasûlullah
-    </p>
-
-    <div class="mb-4">
-      <label for="target-input" class="block text-sm text-gray-600 mb-2">Hedef:</label>
-      <input
-        id="target-input"
-        type="number"
-        class="w-full border border-gray-300 rounded-lg p-2 text-center bg-gray-100 text-gray-700 focus:outline-none"
-        value="70000"
-        readonly
-      />
-    </div>
-
-    <!-- Sayaç Kapsayıcısı -->
-    <div class="relative mx-auto w-52 h-52">
-      <!-- Büyük Sayaç Çemberi -->
-      <div
-        id="count-display"
-        class="text-4xl font-extrabold text-green-600 bg-green-100 rounded-full w-52 h-52 flex items-center justify-center mx-auto cursor-pointer hover:bg-green-200 transition duration-200 outline-none focus:outline-none focus:ring-0 select-none touch-action-manipulation"
-        tabindex="-1"
-      >
-        0
+   <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+      <title>Socket.IO Counter</title>
+      <script src="https://cdn.tailwindcss.com"></script>
+      <style>
+         html, body {
+         touch-action: pan-x pan-y;
+         }
+         #personal-count {
+         -webkit-user-select: none; /* Safari ve eski tarayıcılar */
+         -moz-user-select: none;    /* Firefox */
+         -ms-user-select: none;     /* Eski IE */
+         user-select: none;         /* Modern tarayıcılar */
+         }
+         #success-modal {
+         display: none;
+         }
+         #close-modal:focus {
+         outline: none !important;
+         box-shadow: none !important;
+         }
+         #close-modal {
+         box-shadow: none !important;
+         border: none !important;
+         }
+         #success-modal > div {
+         box-shadow: none !important;
+         border: none !important;
+         }
+         #close-modal:focus, #close-modal:active {
+         outline: none !important;
+         box-shadow: none !important;
+         }
+         #close-modal:focus,
+         #close-modal:active {
+         outline: none !important;
+         box-shadow: none !important;
+         background-color: #3b82f6 !important;
+         }
+      </style>
+   </head>
+   <body class="bg-gradient-to-br from-blue-100 to-blue-300 flex items-center justify-center min-h-screen">
+      <div class="bg-white shadow-xl rounded-2xl p-8 text-center w-80 relative">
+         <h1 class="text-xl font-bold text-gray-800 mb-2">
+            إِنَّا لِلّهِ وَإِنَّـا إِلَيْهِ رَاجِعونَ
+         </h1>
+         <p class="text-sm text-gray-600 mb-6 italic">
+            İnna lillâhi ve innâ ileyhi râciûn
+         </p>
+         <p class="text-lg text-gray-700 font-semibold mb-4">
+            Lâ ilâhe illâllah, Muhammedün Rasûlullah
+         </p>
+         <div class="mb-4">
+            <label for="target-input" class="block text-sm text-gray-600 mb-2">Hedef:</label>
+            <input
+               id="target-input"
+               type="number"
+               class="w-full border border-gray-300 rounded-lg p-2 text-center bg-gray-100 text-gray-700 focus:outline-none"
+               value="70000"
+               readonly
+               />
+         </div>
+         <!-- Sayaç Kapsayıcısı -->
+         <div class="relative mx-auto w-52 h-52">
+            <!-- Büyük Sayaç Çemberi -->
+            <div
+               id="count-display"
+               class="text-4xl font-extrabold text-green-600 bg-green-100 rounded-full w-52 h-52 flex items-center justify-center mx-auto cursor-pointer hover:bg-green-200 transition duration-200 outline-none focus:outline-none focus:ring-0 select-none touch-action-manipulation"
+               tabindex="-1"
+               >
+               0
+            </div>
+            <!-- Kişisel Katkı (Tıklamaya Kapalı, Sağ Üstte) -->
+            <div id="personal-count" class="absolute -top-3 -right-3 w-8 h-8 bg-green-500 text-white text-sm font-bold rounded-full flex items-center justify-center shadow-lg pointer-events-none focus:outline-none select-none">
+               0
+            </div>
+         </div>
+         <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden mt-4">
+            <div id="progress-bar" class="bg-blue-500 h-4 rounded-full" style="width: 0%;"></div>
+         </div>
+         <p id="progress-text" class="text-sm text-gray-600 mt-2">0%</p>
+         <!-- Online Kullanıcı Sayısı (Daha Estetik) -->
+         <div class="flex items-center justify-center mt-4">
+            <span class="bg-green-500 text-white text-sm font-semibold px-4 py-2 rounded-full shadow-md">
+            🟢 Online: <span id="online-count">0</span>
+            </span>
+         </div>
       </div>
-
-      <!-- Kişisel Katkı (Tıklamaya Kapalı, Sağ Üstte) -->
-      <div id="personal-count" class="absolute -top-3 -right-3 w-8 h-8 bg-green-500 text-white text-sm font-bold rounded-full flex items-center justify-center shadow-lg pointer-events-none focus:outline-none select-none">
-        0
+      <!-- Hedefe Ulaşılınca Gösterilecek Modal -->
+      <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+         <div class="bg-white rounded-lg shadow-none p-6 text-center">
+            <h2 class="text-2xl font-bold text-green-600 mb-4">🎉 Tebrikler! Hedefe ulaştınız! 🎉</h2>
+            <p class="text-gray-600 mb-4">Sayacınız belirlenen hedefe ulaştı.</p>
+            <button id="close-modal" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none shadow-none border-none">
+            Kapat
+            </button>     
+         </div>
       </div>
-    </div>
-
-    <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden mt-4">
-      <div id="progress-bar" class="bg-blue-500 h-4 rounded-full" style="width: 0%;"></div>
-    </div>
-
-    <p id="progress-text" class="text-sm text-gray-600 mt-2">0%</p>
-
-    <!-- Online Kullanıcı Sayısı (Daha Estetik) -->
-    <div class="flex items-center justify-center mt-4">
-      <span class="bg-green-500 text-white text-sm font-semibold px-4 py-2 rounded-full shadow-md">
-        🟢 Online: <span id="online-count">0</span>
-      </span>
-    </div>
-  </div>
-
-  <!-- Hedefe Ulaşılınca Gösterilecek Modal -->
-  <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-    <div class="bg-white rounded-lg shadow-none p-6 text-center">
-      <h2 class="text-2xl font-bold text-green-600 mb-4">🎉 Tebrikler! Hedefe ulaştınız! 🎉</h2>
-      <p class="text-gray-600 mb-4">Sayacınız belirlenen hedefe ulaştı.</p>
-      <button id="close-modal" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none shadow-none border-none">
-        Kapat
-      </button>     
-      
-    </div>
-  </div>
-
-  <script src="/socket.io/socket.io.js"></script>
-<script>
-  const socket = io();
-  let target = 10; // Hedef değer
-  let hasReachedTarget = false; // Hedefe ulaşıldı mı kontrolü
-
-  let userId = localStorage.getItem("userId");
-  if (!userId) {
-    userId = Math.random().toString(36).substring(2);
-    localStorage.setItem("userId", userId);
-  }
-
-  socket.emit("registerUser", userId);
-
-  socket.on("connect", () => {
-    console.log("Connected to server");
-  });
-
-  socket.on("updateCount", (count) => {
-    document.getElementById("count-display").textContent = count;
-    updateProgressBar(count);
-
-    if (count >= target && !hasReachedTarget) {
-      hasReachedTarget = true;
-      deactivateCounter();
-      showSuccessModal();
-    }
-  });
-
-  socket.on("personalCount", () => {
-    document.getElementById("personal-count").textContent = 0; // Kişisel sayaç her zaman sıfırlanır
-  });
-
-  socket.on("onlineCount", (count) => {
-    document.getElementById("online-count").textContent = count;
-  });
-
-  document.getElementById("count-display").addEventListener("click", () => {
-    if (!hasReachedTarget) {
-      socket.emit("increment", userId);
-    }
-  });
-
-  function deactivateCounter() {
-    document.getElementById("count-display").style.pointerEvents = "none";
-  }
-
-  function showSuccessModal() {
-    const modal = document.getElementById("success-modal");
-    const closeModalButton = document.getElementById("close-modal");
-
-    modal.style.display = "flex";
-
-    setTimeout(() => {
-      document.activeElement.blur(); // Focus'u kaldır
-      closeModalButton.blur();
-    }, 10);
-
-    // Modal dışına tıklamayı önleme
-    modal.addEventListener("mousedown", function (event) {
-      if (event.target === modal) {
-        event.preventDefault();
-        document.activeElement.blur();
-        closeModalButton.blur();
-      }
-    });
-  }
-
-  function resetCounter() {
-    hasReachedTarget = false;
-    document.getElementById("count-display").style.pointerEvents = "auto";
-    document.getElementById("success-modal").style.display = "none";
-    
-    setTimeout(() => {
-      document.activeElement.blur();
-      document.getElementById("close-modal").blur();
-    }, 10);
-    
-    socket.emit("resetCount");
-  }
-
-  document.getElementById("close-modal").addEventListener("click", resetCounter);
-
-  function updateProgressBar(count) {
-    const percentage = (count / target) * 100;
-    document.getElementById("progress-bar").style.width = `${percentage}%`;
-    document.getElementById("progress-text").textContent = `${percentage.toFixed(2)}%`;
-  }
-
-  // Buton focus'unu tamamen engelle
-  document.getElementById("close-modal").addEventListener("mousedown", function(event) {
-    event.preventDefault();
-    this.blur();
-  });
-
-</script>
-
-</body>
+      <script src="/socket.io/socket.io.js"></script>
+      <script>
+         const socket = io();
+         let target = 10; 
+         let hasReachedTarget = false; 
+         
+         let userId = localStorage.getItem("userId");
+         if (!userId) {
+           userId = Math.random().toString(36).substring(2);
+           localStorage.setItem("userId", userId);
+         }
+         
+         socket.emit("registerUser", userId);
+         
+         socket.on("updateCount", (count) => {
+           document.getElementById("count-display").textContent = count;
+           document.getElementById("progress-bar").style.width = `${(count / target) * 100}%`;
+         
+           if (count >= target && !hasReachedTarget) {
+             hasReachedTarget = true;
+             document.getElementById("success-modal").style.display = "flex";
+           }
+         });
+         
+         document.getElementById("count-display").addEventListener("click", () => {
+           if (!hasReachedTarget) {
+             socket.emit("increment", userId);
+           }
+         });
+         
+         function resetCounter() {
+           hasReachedTarget = false;
+           document.getElementById("count-display").style.pointerEvents = "auto";
+           document.getElementById("success-modal").style.display = "none";
+         
+           setTimeout(() => {
+             document.activeElement.blur();
+             document.getElementById("close-modal").blur();
+           }, 10);
+           
+           socket.emit("resetCount");
+         }
+         
+         document.getElementById("close-modal").addEventListener("click", resetCounter);
+         
+         // 💡 **BURAYA EKLE!**
+         
+         
+         document.getElementById("close-modal").addEventListener("click", function(event) {
+         event.preventDefault();
+         this.blur();
+         });
+         
+         document.getElementById("success-modal").addEventListener("mousedown", function(event) {
+         if (event.target === this) {
+         event.preventDefault();
+         document.activeElement.blur();
+         document.getElementById("close-modal").blur();
+         }
+         });
+         
+         // Çift tıklama ile zoom yapılmasını engelle
+         document.addEventListener("dblclick", function(event) {
+         event.preventDefault();
+         });
+         
+         // Pinch-to-zoom (parmak hareketiyle zoom) engelleme
+         document.addEventListener("gesturestart", function(event) {
+         event.preventDefault();
+         });
+         
+      </script>
+   </body>
 </html>
